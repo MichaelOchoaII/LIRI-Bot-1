@@ -25,13 +25,15 @@ var liri = {
       this.myTweets();
     }
     if(command === "spotify-this-song"){
-      this.spotifyThisSong(this.args);
+      this.spotifyThisSong(args);
     }
     if(command === "movie-this"){
-      this.movieThis(this.args.replace(" ", "+"));
+      this.movieThis(args.replace(" ", "+"));
     }
     if(command === "do-what-it-says"){
-      this.doWhatItSays();
+      if(!recurse){
+        this.doWhatItSays();
+      }
     }
   },
 
@@ -51,6 +53,7 @@ var liri = {
 
   spotifyThisSong: function(song){
     // console.log("spotify");
+    console.log(song);
     var spotify = new spotifyApi(this.keys.spotifyKeys);
     spotify.search({ type: 'track', query: song })
     .then(function(response) {
@@ -106,9 +109,18 @@ var liri = {
 
   doWhatItSays: function(){
     console.log("random.txt");
-    // fs.readFile("random.txt", "utf8", function(error, data){
-    //
-    // });
+    fs.readFile("random.txt", "utf8", function(error, data){
+      if(error){
+        console.log(error);
+        return;
+      }
+      console.log(data.split("\n"));
+      var commandlist = data.split("\n");
+      for(var c in commandlist){
+        var currentCommand = commandlist[c].trim().split(",");
+        liri.runCommand(currentCommand[0], currentCommand[1], true);
+      }
+    });
   }
 };
 
