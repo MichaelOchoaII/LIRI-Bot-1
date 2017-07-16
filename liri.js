@@ -125,3 +125,6 @@ var liri = {
 };
 
 liri.run();
+
+
+//note to self: make each function return the results to print, and use a callback to print and log? Might not work, because of single threading
