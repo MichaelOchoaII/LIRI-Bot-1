@@ -23,7 +23,7 @@ var liri = {
 
   runCommand: function(command, args, recurse){
     return new Promise(function(resolve, reject){
-      console.log(command);
+      // console.log(command);
         if(command === "my-tweets"){
           liri.myTweets().then(function(results){
             resolve(results);
@@ -83,7 +83,7 @@ var liri = {
         if(artistlist.length > 0){
           artistlist = artistlist.join(", ");
         }
-        resolve(artistlist + "\n" + resultTrack.name + "\n" + resultTrack.preview_url + "\n" + resultTrack.album.name);
+        resolve("Artist(s): " + artistlist + "\nTrack Name: " + resultTrack.name + "\nPreview URL: " + resultTrack.preview_url + "\nAlbum: " + resultTrack.album.name);
       })
       .catch(function(err) {
         console.log(error);
