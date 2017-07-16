@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/bexway/LIRI-Bot/issues"
   },
-  "homepage": "https://github.com/bexway/LIRI-Bot#readme"
+  "homepage": "https://github.com/bexway/LIRI-Bot#readme",
+  "dependencies": {
+    "request": "^2.81.0",
+    "twitter": "^1.7.1"
+  }
 }
