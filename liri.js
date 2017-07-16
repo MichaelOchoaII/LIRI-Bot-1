@@ -15,37 +15,36 @@ var liri = {
     if(process.argv.length >2){
       this.args = process.argv.slice(3, process.argv.length).join(" ");
     }
-    this.runCommand(this.command, this.args, false, this.printOutput);
+    this.runCommand(this.command, this.args, false).then(function(results){
+      console.log(results);
+    });
 
   },
 
-  printOutput: function(output){
-    console.log(output);
-  },
-
-  runCommand: function(command, args, recurse, callback){
-    console.log(command);
-      if(command === "my-tweets"){
-        liri.myTweets().then(function(results){
-          callback(results);
-        });
-      }
-      if(command === "spotify-this-song"){
-        liri.spotifyThisSong(args).then(function(results){
-          callback(results);
-        });
-      }
-      if(command === "movie-this"){
-        liri.movieThis(args.replace(" ", "+")).then(function(results){
-          callback(results);
-        });
-      }
-      if(command === "do-what-it-says"){
-        if(!recurse){
-          liri.doWhatItSays();
+  runCommand: function(command, args, recurse){
+    return new Promise(function(resolve, reject){
+      console.log(command);
+        if(command === "my-tweets"){
+          liri.myTweets().then(function(results){
+            resolve(results);
+          });
         }
-      }
-
+        if(command === "spotify-this-song"){
+          liri.spotifyThisSong(args).then(function(results){
+            resolve(results);
+          });
+        }
+        if(command === "movie-this"){
+          liri.movieThis(args.replace(" ", "+")).then(function(results){
+            resolve(results);
+          });
+        }
+        if(command === "do-what-it-says"){
+          if(!recurse){
+            liri.doWhatItSays();
+          }
+        }
+    });
   },
 
   myTweets: function(){
@@ -68,9 +67,9 @@ var liri = {
   },
 
   spotifyThisSong: function(song){
-    // console.log("spotify");
-    // console.log(song);
-    // var output = "";
+    if(!song){
+      song = "The Sign";
+    }
     return new Promise(function(resolve, reject){
       var spotify = new spotifyApi(liri.keys.spotifyKeys);
       spotify.search({ type: 'track', query: song })
@@ -84,11 +83,6 @@ var liri = {
         if(artistlist.length > 0){
           artistlist = artistlist.join(", ");
         }
-
-        // console.log(artistlist);
-        // console.log(resultTrack.name);
-        // console.log(resultTrack.preview_url);
-        // console.log(resultTrack.album.name);
         resolve(artistlist + "\n" + resultTrack.name + "\n" + resultTrack.preview_url + "\n" + resultTrack.album.name);
       })
       .catch(function(err) {
@@ -99,13 +93,14 @@ var liri = {
 
   movieThis: function(movie){
     // console.log("movie");
+    if(!movie){
+      movie = "Mr.+Nobody";
+    }
     return new Promise(function(resolve, reject){
       var queryUrl = "http://www.omdbapi.com/?t=" + movie + "&y=&plot=short&apikey=40e9cece";
       request(queryUrl, function(error, response, body){
         if(!error && response.statusCode === 200){
           var movieinfo = JSON.parse(body);
-          // console.log("Title: "+movieinfo.Title);
-          // console.log("Year: "+movieinfo.Year);
           var imdbrating, rtrating;
           for(var r in movieinfo.Ratings){
             if(r.Source === "Internet Movie Database"){
@@ -115,12 +110,6 @@ var liri = {
               rtrating = r.Value;
             }
           }
-          // console.log("IMDB Rating: "+imdbrating);
-          // console.log("Rotten Tomatoes Rating: "+rtrating);
-          // console.log("Country: "+movieinfo.Country);
-          // console.log("Language: "+movieinfo.Language);
-          // console.log("Plot: "+movieinfo.Plot);
-          // console.log("Actors: "+movieinfo.Actors);
           resolve("Title: "+movieinfo.Title+"\n"+"Year: "+movieinfo.Year+"\n"+"IMDB Rating: "+imdbrating+"\nRotten Tomatoes Rating: "+rtrating+"\nCountry: "+movieinfo.Country+"\nLanguage: "+movieinfo.Language+"\nPlot: "+movieinfo.Plot+"\nActors: "+movieinfo.Actors);
         }
         else{
@@ -139,10 +128,17 @@ var liri = {
       }
       console.log(data.split("\n"));
       var commandlist = data.split("\n");
+      var promiselist = [];
       for(var c in commandlist){
+        console.log(c);
         var currentCommand = commandlist[c].trim().split(",");
-        liri.runCommand(currentCommand[0], currentCommand[1], true, liri.printOutput);
+        promiselist.push(liri.runCommand(currentCommand[0], currentCommand[1], true));
       }
+      Promise.all(promiselist).then(function(values) {
+        for(var v in values){
+          console.log(values[v]);
+        }
+      });
     });
   }
 
