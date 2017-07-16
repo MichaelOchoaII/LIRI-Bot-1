@@ -17,6 +17,7 @@ var liri = {
     }
     this.runCommand(this.command, this.args, false).then(function(results){
       console.log(results);
+      liri.logOutput(liri.command, results);
     });
 
   },
@@ -42,6 +43,7 @@ var liri = {
         if(command === "do-what-it-says"){
           if(!recurse){
             liri.doWhatItSays();
+            resolve("");
           }
         }
     });
@@ -120,32 +122,36 @@ var liri = {
   },
 
   doWhatItSays: function(){
-    console.log("random.txt");
+    // console.log("random.txt");
     fs.readFile("random.txt", "utf8", function(error, data){
       if(error){
         console.log(error);
         return;
       }
-      console.log(data.split("\n"));
+      // console.log(data.split("\n"));
       var commandlist = data.split("\n");
       var promiselist = [];
       for(var c in commandlist){
-        console.log(c);
         var currentCommand = commandlist[c].trim().split(",");
         promiselist.push(liri.runCommand(currentCommand[0], currentCommand[1], true));
       }
       Promise.all(promiselist).then(function(values) {
         for(var v in values){
           console.log(values[v]);
+          liri.logOutput(commandlist[v].trim(), values[v]);
         }
       });
     });
-  }
+  },
 
+  logOutput: function(command, output){
+    fs.appendFile("log.txt", command+"\n---\n"+output+"\n---\n", function(err) {
+      if (err) {
+        console.log(err);
+      }
+    });
+  }
 
 };
 
 liri.run();
-
-
-//note to self: make each function return the results to print, and use a callback to print and log? Might not work, because of single threading
