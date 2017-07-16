@@ -24,27 +24,34 @@ var liri = {
 
   runCommand: function(command, args, recurse){
     return new Promise(function(resolve, reject){
-      // console.log(command);
+      // console.log(command === "my-tweets");
         if(command === "my-tweets"){
           liri.myTweets().then(function(results){
             resolve(results);
           });
         }
-        if(command === "spotify-this-song"){
+        else if(command === "spotify-this-song"){
           liri.spotifyThisSong(args).then(function(results){
             resolve(results);
           });
         }
-        if(command === "movie-this"){
+        else if(command === "movie-this"){
           liri.movieThis(args.replace(" ", "+")).then(function(results){
             resolve(results);
           });
         }
-        if(command === "do-what-it-says"){
+        else if(command === "do-what-it-says"){
           if(!recurse){
             liri.doWhatItSays();
             resolve("");
           }
+          else{
+            resolve("invalid command: cannot call do-what-it-says from within random.txt");
+          }
+
+        }
+        else{
+          resolve("invalid command: could not recognize command");
         }
     });
   },
@@ -122,18 +129,21 @@ var liri = {
   },
 
   doWhatItSays: function(){
-    // console.log("random.txt");
+    console.log("random.txt");
     fs.readFile("random.txt", "utf8", function(error, data){
       if(error){
         console.log(error);
         return;
       }
-      // console.log(data.split("\n"));
+      console.log(data.split("\n"));
       var commandlist = data.split("\n");
       var promiselist = [];
       for(var c in commandlist){
-        var currentCommand = commandlist[c].trim().split(",");
-        promiselist.push(liri.runCommand(currentCommand[0], currentCommand[1], true));
+        //ignore blank lines
+        if(commandlist[c]){
+          var currentCommand = commandlist[c].trim().split(",");
+          promiselist.push(liri.runCommand(currentCommand[0], currentCommand[1], true));
+        }
       }
       Promise.all(promiselist).then(function(values) {
         for(var v in values){
@@ -149,9 +159,16 @@ var liri = {
       if (err) {
         console.log(err);
       }
+      // else {
+      //   console.log("Content Added!");
+      // }
     });
   }
+
 
 };
 
 liri.run();
+
+
+//note to self: make each function return the results to print, and use a callback to print and log? Might not work, because of single threading
