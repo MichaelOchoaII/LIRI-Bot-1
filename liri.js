@@ -2,6 +2,7 @@ var request = require("request");
 var twitter = require("twitter");
 //https://github.com/thelinmichael/spotify-web-api-node
 var spotifyApi = require("node-spotify-api");
+var fs = require("fs");
 
 var liri = {
   command: "",
@@ -12,7 +13,7 @@ var liri = {
     // console.log("START");
     this.command = process.argv[2].toLowerCase();
     if(process.argv.length >2){
-      this.args = process.argv.slice(3, process.argv.length);
+      this.args = process.argv.slice(3, process.argv.length).join(" ");
     }
     this.runCommand(this.command, this.args, false);
 
@@ -24,10 +25,10 @@ var liri = {
       this.myTweets();
     }
     if(command === "spotify-this-song"){
-      this.spotifyThisSong();
+      this.spotifyThisSong(this.args);
     }
     if(command === "movie-this"){
-      this.movieThis(args.join("+"));
+      this.movieThis(this.args.replace(" ", "+"));
     }
     if(command === "do-what-it-says"){
       this.doWhatItSays();
@@ -42,9 +43,6 @@ var liri = {
         console.log(error);
         return;
       }
-
-      // console.log(tweets);  // The favorites.
-      // console.log(response);  // Raw response object.
       for(var t = 0; t<Math.min(20, tweets.length);t++){
         console.log(tweets[t].created_at+"\n"+tweets[t].text+"\n");
       }
@@ -52,8 +50,28 @@ var liri = {
   },
 
   spotifyThisSong: function(song){
-    console.log("spotify");
+    // console.log("spotify");
+    var spotify = new spotifyApi(this.keys.spotifyKeys);
+    spotify.search({ type: 'track', query: song })
+    .then(function(response) {
+      // console.log(response.tracks.items[0]);
+      var resultTrack = response.tracks.items[0];
+      var artistlist = [];
+      for(var a in resultTrack.artists){
+        artistlist.push(resultTrack.artists[a].name);
+      }
+      if(artistlist.length > 0){
+        artistlist = artistlist.join(", ");
+      }
 
+      console.log(artistlist);
+      console.log(resultTrack.name);
+      console.log(resultTrack.preview_url);
+      console.log(resultTrack.album.name);
+    })
+    .catch(function(err) {
+      console.log(error);
+    });
   },
 
   movieThis: function(movie){
@@ -88,6 +106,9 @@ var liri = {
 
   doWhatItSays: function(){
     console.log("random.txt");
+    // fs.readFile("random.txt", "utf8", function(error, data){
+    //
+    // });
   }
 };
 

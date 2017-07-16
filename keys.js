@@ -6,7 +6,7 @@ exports.twitterKeys = {
 };
 
 exports.spotifyKeys = {
-  clientId : '944a88ac62cd4876b7df1b7f1252e600',
-  clientSecret : '7981305b3c6d48bea4f9f7fa0b02794b',
+  id : '944a88ac62cd4876b7df1b7f1252e600',
+  secret : '7ee0e216cf574e2aa47e9f239a33c835'
   // redirectUri : 'http://www.example.com/callback'
 };
