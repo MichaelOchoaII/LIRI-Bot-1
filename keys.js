@@ -10,3 +10,5 @@ exports.spotifyKeys = {
   secret : '7ee0e216cf574e2aa47e9f239a33c835'
   // redirectUri : 'http://www.example.com/callback'
 };
+
+exports.omdbkey = "40e9cece";
